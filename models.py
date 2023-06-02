@@ -19,6 +19,8 @@ class Category(Base):
         default=datetime.datetime.now
     )  # connect with all without Payments
 
+    # category z fimCategory 1 do 1
+
 
 class FilmCategory(Base):
     __tablename__ = "filmCategories"
@@ -35,11 +37,14 @@ class FilmCategory(Base):
         default=datetime.datetime.now
     )  # connect with all without Payments
 
+    # film Category z Category - 1 do 1
+    # fimCategory  z Film 1 do 1
+
 
 class Film(Base):
     __tablename__ = "films"
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, nullable=False, unique=True)
     title = Column(String(200), nullable=False, unique=True)
     description = Column(String(200))
     release_year = Column(Integer)
@@ -58,6 +63,11 @@ class Film(Base):
     special_features = Column(String(100))
     fulltext = Column(Text)
 
+    # Film z FilmCategory 1 do 1
+    # Film z Inventory wiele do 1
+    # Film z Film actor wiele do 1
+    # Film z Language wiele do 1
+
 
 class Language(Base):
     __tablename__ = "languages"
@@ -75,6 +85,8 @@ class Language(Base):
         nullable=False,
         default=datetime.datetime.now
     )
+
+    # Language z Film - 1 do wielu
 
 
 class Inventory(Base):
@@ -96,25 +108,36 @@ class Inventory(Base):
         default=datetime.datetime.now
     )
 
+    # Inventory z Film - 1 do wielu
+    # Inventory z Rental - 1 do wielu
+
 
 class Rental(Base):
     __tablename__ = "rentals"
 
-    rental_id = Column(Integer, primary_key=True)
+    rental_id = Column(Integer, nullable=False, primary_key=True)
     rental_date = Column(Integer)
     inventory_id = Column(
         Integer,
         ForeignKey("inventories.inventory_id")
     )
-    customer_id = Column(Integer, nullable=False, unique=False)
+    customer_id = Column(
+        Integer
+    )
+
     return_date = Column(Integer)
-    stuff_id = Column(Integer)
+    stuff_id = Column(Integer, nullable=False)
 
     last_update = Column(
         DateTime,
         nullable=False,
-        default=datetime.datetime.now()
+        default=datetime.datetime.now
     )
+
+    # Rental z Inventor - wiele do 1
+    # Rental z Customer 1 do 1
+    # Rental z Payments 1 do wielu
+    # Rental z Staff wiele do 1
 
 
 class FilmActor(Base):
@@ -133,6 +156,9 @@ class FilmActor(Base):
         nullable=False,
         default=datetime.datetime.now
     )
+
+    # FilmActor z Film 1 do wielu
+    # FilmActor z Actor wiele do 1
 
 
 class Actor(Base):
@@ -154,22 +180,23 @@ class Actor(Base):
         default=datetime.datetime.now
     )
 
+    # Actor z FilmActor 1 do wielu
+
 
 class Customer(Base):
     __tablename__ = "customers"
 
     customer_id = Column(
         Integer,
-        ForeignKey("rentals.customer_id"),
-        primary_key=True,
-        nullable=False,
-        unique=True
+        # ForeignKey("rentals.customer_id"),
+        primary_key=True
     )
 
     store_id = Column(
-        Integer,
-        ForeignKey("inventories.store_id")
-    )
+        Integer)
+        # ForeignKey("inventories.store_id"),
+        # nullable=False
+
 
     first_name = Column(String(50), nullable=False)
     last_name = Column(String(100), nullable=False)
@@ -177,11 +204,15 @@ class Customer(Base):
     address_id = Column(String(100), nullable=False, unique=True)
     is_active = Column(String(20), nullable=False)
     create_date = Column(String(10))
-    lastupdate = Column(String(10))
+    last_update = Column(String(10))
 
     rental_id = Column(
-        Integer,
-        ForeignKey("rentals.rental_id"))
+        Integer)
+       # ForeignKey("rentals.rental_id"))
+
+    # Customer z Rental 1 do 1
+    # Customer z Address wiele do 1
+    # Customer z Payments 1 do wielu
 
 
 class Payment(Base):
@@ -191,21 +222,27 @@ class Payment(Base):
 
     customer_id = Column(
         Integer,
-        ForeignKey("customers.customer_id")
+        ForeignKey("customers.customer_id"),
+        nullable=False
     )
 
     stuff_id = Column(
-        Integer,
-        ForeignKey("rentals.stuff_id")
-    )
+        Integer)
+        #  ForeignKey("rentals.stuff_id"),
+        #  nullable=False
 
     rental_id = Column(
-        Integer,
-        ForeignKey("rentals.rental_id")
-    )
+        Integer)
+        # ForeignKey("rentals.rental_id"),
+        # nullable=False
+
 
     amount = Column(Integer)
     payment_date = Column(String(10))
+
+    # Payment z Rental wiele do 1
+    # Payment with Customer wiele do 1
+    # Payments with Staff wiele do 1
 
 
 class Address(Base):
@@ -228,32 +265,40 @@ class Address(Base):
         default=datetime.datetime.now
     )
 
+    # Address with Customer jeden do wielu
+    # Address with City wiele do 1
+    # Address with Store 1 do wielu
+    # Address with Staff 1 do wielu
+
 
 class Staff(Base):
     __tablename__ = "staff"
 
-    staff_id = Column(
-        Integer,
-        ForeignKey("rentals.staff_id"),
-        primary_key=True
-    )
-
+    staff_id = Column(Integer, unique=True)
     first_name = Column(String(50), nullable=False)
     last_name = Column(String(50), nullable=False)
-    address_id = Column(Integer, nullable=False)
+    address_id = Column(
+        Integer,
+        ForeignKey("addresses.address_id"),
+        nullable=False)
 
-    store_id = Column(Integer)
+    store_id = Column(Integer, primary_key=True)
     active = Column(String(20))
     username = Column(String(20), nullable=False, unique=True)
     password = Column(String(20), nullable=False)
 
-    lastupdate = Column(
+    last_update = Column(
         DateTime,
         nullable=False,
         default=datetime.datetime.now
     )
 
     picture = Column(String(20))
+
+    # Staff with Address 1 do wielu
+    # Staff with Payments 1 do wielu
+    # Staff with Rental 1 do wielu
+    # Staff with Store 1 do 1
 
 
 class City(Base):
@@ -276,6 +321,9 @@ class City(Base):
         default=datetime.datetime.now
     )
 
+    # City with Address 1 do wielu
+    # City with country wiele do 1
+
 
 class Country(Base):
     __tablename__ = "countries"
@@ -296,17 +344,18 @@ class Country(Base):
         default=datetime.datetime.now
     )
 
+    # Country with City 1 do wielu
+
 
 class Store(Base):
     __tablename__ = "stores"
 
     store_id = Column(
-        Integer,
-        ForeignKey("staff.store.id"),
-        primary_key=True
-    )
+        Integer)
+        #ForeignKey("staff.store_id"),
+        #unique=True
 
-    manager_staff_id = Column(Integer, nullable=False)
+    manager_staff_id = Column(Integer, nullable=False, primary_key=True)
     address_id = Column(Integer)
 
     last_update = Column(
@@ -314,3 +363,9 @@ class Store(Base):
         nullable=False,
         default=datetime.datetime.now
     )
+
+    # Store with Address wiele do 1
+    # Store with Staff 1 do 1
+
+
+Base.metadata.create_all(engine)
